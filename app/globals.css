@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+/*
+ * Getclick — taken from the logo: a copper curtain behind a bone wordmark.
+ * 60 Bone (ground) / 30 Ink (type, inverse surfaces) / 10 Copper (actions, prices).
+ * Tints are Bone or Ink at opacity, never new hues.
+ */
+:root {
+  --ink: #17120f;
+  --bone: #f2ede6;
+  --copper: #a9461b;
+  /* Solid surface steps of Bone toward Ink (no translucency over the grid) */
+  --surface: #fbf9f5;
+  --surface-2: #f3eee7;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-bone: var(--bone);
+  --color-copper: var(--copper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --font-sans: var(--font-archivo);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  background: var(--bone);
+}
+
+body {
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wide {
+  font-weight: 800;
+  font-stretch: 125%;
+  font-variation-settings: "wdth" 125;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--copper);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--copper);
+  color: var(--bone);
+}
+
+/* —— Press feedback —— */
+.press {
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 200ms ease,
+    color 200ms ease;
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* —— Curtain: the logo's stripes drop in —— */
+.stripe {
+  transform-origin: top;
+  animation: drop 1100ms var(--ease-out) both;
+}
+@keyframes drop {
+  from {
+    transform: scaleY(0);
+  }
+}
+.curtain-word {
+  animation: rise 900ms var(--ease-out) 650ms both;
+}
+.hero-in {
+  animation: rise 800ms var(--ease-out) both;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/* Slow sway on the curtain once it has dropped */
+.sway {
+  animation: sway 9s ease-in-out 1.4s infinite alternate;
+  transform-origin: top;
+}
+@keyframes sway {
+  to {
+    transform: scaleY(1.025) translateX(-6px);
+  }
+}
+
+/* —— Scroll reveal (only hides when JS is running) —— */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+.js .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* —— Category panel swap —— */
+.swap {
+  animation: swap 420ms var(--ease-out) both;
+}
+@keyframes swap {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(3px);
+  }
+}
+
+/* Pack cards: staggered rise, replays on category change */
+.card-in {
+  animation: rise 600ms var(--ease-out) both;
+}
+
+/* Backdrop grid: faint ink, fades out from the top, drifts slowly */
+.bg-grid {
+  position: absolute;
+  inset: -224px 0 0 0;
+  background-image:
+    linear-gradient(rgba(23, 18, 15, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 18, 15, 0.14) 1px, transparent 1px),
+    linear-gradient(rgba(23, 18, 15, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 18, 15, 0.07) 1px, transparent 1px);
+  background-size:
+    224px 224px,
+    224px 224px,
+    56px 56px,
+    56px 56px;
+  background-position: center top;
+  
+  animation:
+    fade 1200ms ease-out both,
+    drift 40s linear infinite;
+}
+@keyframes drift {
+  to {
+    transform: translateY(224px);
+  }
+}
+
+/* Hero: words rise one by one, wordmark wipes up */
+.word {
+  display: inline-block;
+  animation: rise 700ms var(--ease-out) both;
+}
+.clip-up {
+  animation: clipUp 900ms var(--ease-out) both;
+}
+@keyframes clipUp {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(16px);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Cards lift on hover (pointer devices only) */
+.lift {
+  transition: transform 250ms var(--ease-out), box-shadow 250ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px -20px rgba(23, 18, 15, 0.35); /* taste-skill-ignore: hover lift only */
+  }
+}
+
+/* Backdrop lines (from the reference component), faint ink */
+.backdrop-lines .hline,
+.backdrop-lines .vline {
+  position: absolute;
+  background: rgba(23, 18, 15, 0.2);
+}
+@media (max-width: 767px) {
+  .backdrop-lines .vline {
+    display: none;
+  }
+}
+.backdrop-lines .hline {
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: scaleX(0);
+  animation: drawX 900ms var(--ease-out) forwards;
+}
+.backdrop-lines .vline {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: scaleY(0);
+  transform-origin: top;
+  animation: drawY 1100ms var(--ease-out) forwards;
+}
+@keyframes drawX {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes drawY {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Price/total change */
+.tick {
+  animation: tick 260ms var(--ease-out);
+}
+@keyframes tick {
+  from {
+    opacity: 0.4;
+    transform: translateY(6px);
+    filter: blur(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .stripe,
+  .sway,
+  .curtain-word,
+  .hero-in,
+  .swap,
+  .card-in,
+  .tick,
+  .word,
+  .clip-up,
+  .backdrop-lines span {
+    animation: fade 200ms ease both;
+  }
+  .js .reveal {
+    transform: none;
+    transition: opacity 300ms ease;
+  }
+  .press:active,
+  .lift:hover {
+    transform: none;
+  }
+  .bg-grid {
+    animation: fade 200ms ease both;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
