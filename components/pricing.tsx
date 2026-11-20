@@ -32,7 +32,6 @@ import {
   type Selection,
 } from "@/lib/pricing";
 
-const VISIBLE_ITEMS = 5;
 
 export default function Pricing() {
   const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
@@ -215,6 +214,7 @@ function Offer({
         {packs.map((p, i) => (
           <PackCard
             key={p.id}
+            delayLabel={category.delayLabel ?? "Délai"}
             pack={p}
             index={i}
             highlighted={i === hi}
@@ -298,12 +298,14 @@ function Offer({
 }
 
 function PackCard({
+  delayLabel,
   pack,
   index,
   highlighted,
   recommended,
   onChoose,
 }: {
+  delayLabel: string;
   pack: Pack;
   index: number;
   highlighted: boolean;
@@ -337,7 +339,12 @@ function PackCard({
         )}
       </div>
 
-      <p className={`wide num mt-6 text-[min(56px,11.5cqi)] whitespace-nowrap ${dark ? "text-copper" : ""}`}>
+      <p className={`mt-3 text-[15px] leading-[1.5] ${dark ? "text-bone/80" : "text-ink/75"}`}>{pack.value}</p>
+
+      {!pack.quote && (
+        <p className={`mt-5 text-[13px] font-semibold tracking-[0.02em] ${dark ? "text-bone/70" : "text-copper"}`}>À partir de</p>
+      )}
+      <p className={`wide num text-[min(56px,11.5cqi)] whitespace-nowrap ${pack.quote ? "mt-5" : "mt-1"} ${dark ? "text-copper" : ""}`}>
         {pack.quote ? (
           "Sur devis"
         ) : (
@@ -358,19 +365,40 @@ function PackCard({
         <span className="font-medium">« {pack.forWho} »</span>
       </p>
 
-      <div className={`mt-5 rounded-xl px-4 py-4 ${dark ? "bg-bone/[0.07]" : "bg-surface-2"}`}>
-        <p className={`text-[13px] font-semibold ${dark ? "text-bone/70" : "text-copper"}`}>Ce que ça vous apporte</p>
-        <p className="mt-1.5 text-[15px] leading-[1.5]">{pack.value}</p>
-      </div>
+      {pack.delay && (
+        <p className={`mt-3 inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-[14px] font-medium ${dark ? "bg-bone/[0.08]" : "bg-surface-2 ring-1 ring-ink/10"}`}>
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          {delayLabel} : {pack.delay}
+        </p>
+      )}
+
 
       <ul className="mt-6 grid gap-3">
-        {pack.highlights.slice(0, VISIBLE_ITEMS).map((f) => (
+        {pack.highlights.map((f) => (
           <li key={f} className="flex gap-3 text-[15px] leading-[1.45]">
             <Check className="mt-[3px] shrink-0 text-copper" />
             {f}
           </li>
         ))}
       </ul>
+
+      {pack.examples && pack.examples.length > 0 && (
+        <div className="mt-6">
+          <p className={`text-[13px] font-semibold ${dark ? "text-bone/70" : "text-ink/60"}`}>Exemples d&apos;utilisation</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {pack.examples.map((ex) => (
+              <li
+                key={ex}
+                className={`rounded-full px-3 py-1.5 text-[13px] leading-tight ${dark ? "bg-bone/[0.08] text-bone" : "bg-surface-2 ring-1 ring-ink/10"}`}
+              >
+                {ex}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <button
         type="button"
@@ -401,7 +429,7 @@ function PackCard({
           ))}
           {pack.delay && (
             <p className="text-[14px]">
-              <span className="font-semibold">Délai : </span>
+              <span className="font-semibold">{delayLabel} : </span>
               {pack.delay}
             </p>
           )}

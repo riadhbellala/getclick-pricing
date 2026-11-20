@@ -67,6 +67,8 @@ export type Extra = {
    * "month" / "year": a recurring amount, never added to the one-time total.
    */
   per?: "page" | "20products" | "month" | "year";
+  /** Price that depends on the chosen pack (packId → price). Falls back to `price`. */
+  packPrices?: Record<string, number>;
 };
 
 export type Pack = {
@@ -86,7 +88,7 @@ export type Pack = {
   modules?: number | null;
   /** Pour qui. */
   forWho: string;
-  /** Ce que ça vous apporte. */
+  /** What the pack is and what it brings, in one line (shown under the name). */
   value: string;
   /** The 5 key items shown on the card. */
   highlights: string[];
@@ -98,6 +100,8 @@ export type Pack = {
   inclus: string[];
   /** Délai. */
   delay?: string;
+  /** "Exemples d'utilisation": typical businesses that use this pack (not client references). */
+  examples?: string[];
   /** Extras already part of this pack (shown as "Inclus", not charged). */
   includesExtras?: string[];
   /** Not shown as a card; reached from a link under the cards. */
@@ -139,6 +143,8 @@ export type Category = {
   packs: Pack[];
   extras: Extra[];
   helper?: Helper;
+  /** Word shown before the delivery time on cards. Default "Délai". */
+  delayLabel?: string;
   /** Small link under the cards: opens a hidden pack, or goes to WhatsApp with a message. */
   sideLink?: { text: string; packId?: string; whatsapp?: string };
 };
@@ -174,15 +180,8 @@ export const CATEGORIES: Category[] = [
         price: 29000,
         included: 1,
         forWho: "Freelance, artisan ou petit commerce qui veut être présent sur internet rapidement",
-        value:
-          "Un lien professionnel à mettre dans votre bio Instagram et sur vos cartes. Vos clients vous trouvent, voient votre travail et vous écrivent sur WhatsApp en un clic.",
-        highlights: [
-          `${t("onepage")} : jusqu'à 6 sections`,
-          `${t("portfolio")} de 6 projets`,
-          "Bouton WhatsApp toujours visible",
-          `${t("hosting")} 1 an`,
-          "Livré en 5 jours",
-        ],
+        value: "Une seule page claire pour présenter votre travail et recevoir des messages WhatsApp.",
+        highlights: ["1 page avec jusqu'à 6 sections", "Vos 6 meilleurs projets en photos", "Bouton WhatsApp toujours visible", "Google Maps et liens vers vos réseaux", "Marche sur téléphone et ordinateur", "Site en ligne et sécurisé pendant 1 an"],
         sections: [
           "1 page avec jusqu'à 6 sections au choix",
           `Un ${t("portfolio")} de 6 projets maximum`,
@@ -197,6 +196,7 @@ export const CATEGORIES: Category[] = [
         ],
         inclus: [`${t("hosting")} pendant 1 an`, "2 tours de modifications", "On répare gratuitement pendant 3 mois"],
         delay: "5 jours",
+        examples: ["Photographe", "Artisan", "Coach ou formateur"],
       },
       {
         id: "vitrine",
@@ -204,15 +204,8 @@ export const CATEGORIES: Category[] = [
         price: 55000,
         included: 4,
         forWho: "Commerce, cabinet, agence ou créatif qui veut inspirer confiance",
-        value:
-          "Un vrai site professionnel à votre nom, qui montre votre sérieux, présente vos services en détail et transforme les visiteurs en demandes de contact.",
-        highlights: [
-          "4 pages, jusqu'à 14 sections",
-          "Portfolio de 20 projets, chacun avec sa galerie",
-          "Formulaire de contact reçu par email et WhatsApp",
-          `${t("domain", "Nom de domaine .com")} 1 an`,
-          `1 ${t("email")}`,
-        ],
+        value: "Un site complet de 4 pages, à votre nom, pour inspirer confiance et attirer des demandes.",
+        highlights: ["4 pages, jusqu'à 14 sections", "Jusqu'à 20 projets, chacun avec sa galerie", "Formulaire reçu par email et WhatsApp", "Avis de vos clients", "Adresse .com offerte 1 an", "1 email pro (contact@votresite.com)"],
         sections: [
           "4 pages (par exemple Accueil, À propos, Services ou Réalisations, Contact)",
           "Jusqu'à 14 sections au total",
@@ -234,6 +227,7 @@ export const CATEGORIES: Category[] = [
           "On répare gratuitement pendant 3 mois",
         ],
         delay: "10 jours",
+        examples: ["Cabinet médical", "Agence d'architecture", "Restaurant"],
       },
       {
         id: "vitrine-pro",
@@ -241,15 +235,8 @@ export const CATEGORIES: Category[] = [
         price: 85000,
         included: 8,
         forWho: "Entreprise ou créatif qui veut se démarquer et gérer son site seul",
-        value:
-          "Un site qui impressionne au premier regard, que vous mettez à jour vous-même sans payer à chaque changement, en français et en arabe pour toucher tous vos clients.",
-        highlights: [
-          "8 pages, sections illimitées",
-          t("cms"),
-          `Français + arabe avec ${t("rtl")}`,
-          "Portfolio illimité avec filtres",
-          "3 emails professionnels",
-        ],
+        value: "Un site haut de gamme que vous modifiez vous-même, en français et en arabe.",
+        highlights: ["8 pages, sections illimitées", "Vous changez textes et photos vous-même", "Français + arabe", "Projets illimités avec filtres", "Animations et design haut de gamme", "Blog / actualités", "3 emails pro"],
         sections: [
           "8 pages, sections illimitées",
           "Portfolio illimité, avec filtres par catégorie",
@@ -273,6 +260,7 @@ export const CATEGORIES: Category[] = [
         ],
         delay: "15 jours",
         includesExtras: ["arabe"],
+        examples: ["Bureau d'études", "Clinique privée", "Agence de communication"],
       },
     ],
     extras: [
@@ -317,15 +305,8 @@ export const CATEGORIES: Category[] = [
         price: 79000,
         included: 30,
         forWho: "Entreprise avec une petite gamme de produits",
-        value:
-          "Vos produits présentés comme une grande marque. Vos commerciaux partagent un lien au lieu d'envoyer des photos, et les demandes de devis arrivent directement sur WhatsApp.",
-        highlights: [
-          "Jusqu'à 30 produits, rangés par catégories",
-          "Une fiche par produit avec ses caractéristiques",
-          "Bouton « Demander un devis » sur WhatsApp",
-          `${t("dashboard")} pour ajouter vos produits`,
-          "2 emails professionnels",
-        ],
+        value: "Un catalogue en ligne de vos produits, avec demande de devis directe sur WhatsApp.",
+        highlights: ["Jusqu'à 30 produits par catégories", "Une fiche détaillée par produit", "Bouton « Demander un devis » sur WhatsApp", "Vous ajoutez vos produits vous-même", "Français + 1 autre langue", "2 emails pro"],
         sections: [
           "Accueil (bannière, catégories, produits phares, présentation)",
           "Nos produits",
@@ -350,6 +331,7 @@ export const CATEGORIES: Category[] = [
           "On répare gratuitement pendant 3 mois",
         ],
         delay: "15 jours",
+        examples: ["Matériaux de construction", "Équipements agricoles", "Fournisseur de pièces"],
       },
       {
         id: "catalogue-pro",
@@ -357,15 +339,8 @@ export const CATEGORIES: Category[] = [
         price: 139000,
         included: 150,
         forWho: "Entreprise avec plusieurs gammes et des clients professionnels",
-        value:
-          "Vos clients trouvent le bon produit en quelques secondes, téléchargent les fiches techniques et vous envoient une seule demande pour plusieurs produits. Vous gagnez du temps et des commandes plus grandes.",
-        highlights: [
-          "Jusqu'à 150 produits",
-          "Recherche et filtres de produits",
-          "Fiches techniques PDF à télécharger",
-          "Une seule demande de devis pour plusieurs produits",
-          "3 langues : français, arabe, anglais",
-        ],
+        value: "Un catalogue complet avec recherche, fiches techniques et devis pour plusieurs produits.",
+        highlights: ["Jusqu'à 150 produits", "Recherche et filtres", "Fiches techniques PDF à télécharger", "Une seule demande pour plusieurs produits", "3 langues : français, arabe, anglais", "Statistiques de vos visiteurs"],
         sections: [
           "Tout ce qu'offre Catalogue",
           "Meilleures ventes",
@@ -388,6 +363,7 @@ export const CATEGORIES: Category[] = [
           "On répare gratuitement pendant 6 mois",
         ],
         delay: "20 jours",
+        examples: ["Distributeur de lubrifiants", "Matériel médical", "Électricité industrielle"],
       },
       {
         id: "catalogue-industrie",
@@ -395,15 +371,8 @@ export const CATEGORIES: Category[] = [
         price: 219000,
         included: null,
         forWho: "Usine, importateur ou grand distributeur",
-        value:
-          "Un site au niveau des grandes entreprises internationales. Vos revendeurs ont leur espace avec leurs prix, vos clients trouvent le point de vente le plus proche, et vous recrutez directement depuis le site.",
-        highlights: [
-          "Produits illimités",
-          "Carte interactive de vos points de vente",
-          "Espace revendeurs avec prix professionnels",
-          "Page Carrières avec candidatures en ligne",
-          "Maintenance chaque mois pendant 1 an",
-        ],
+        value: "Un site de grande entreprise, avec espace revendeurs et carte de vos points de vente.",
+        highlights: ["Produits illimités", "Carte de vos points de vente", "Espace revendeurs avec leurs prix", "Page recrutement avec candidatures", "Actualités et presse", "Maintenance chaque mois pendant 1 an"],
         sections: [
           "Tout ce qu'offre Catalogue Pro",
           "Points de vente",
@@ -426,6 +395,7 @@ export const CATEGORIES: Category[] = [
           "On répare gratuitement pendant 6 mois",
         ],
         delay: "30 jours",
+        examples: ["Usine agroalimentaire", "Importateur", "Groupe industriel"],
       },
     ],
     extras: [
@@ -470,15 +440,8 @@ export const CATEGORIES: Category[] = [
         price: 69000,
         included: 30,
         forWho: "Je vends sur Instagram et je veux une vraie boutique",
-        value:
-          "Fini les commandes perdues dans les messages. Vos clients commandent seuls, 24h/24, et vous gérez tout depuis un seul tableau de bord.",
-        highlights: [
-          "Jusqu'à 30 produits, avec tailles et couleurs",
-          `Panier et ${t("cod")}`,
-          "Prix de livraison pour les 58 wilayas",
-          "Alerte WhatsApp à chaque commande",
-          "Livré en 15 jours",
-        ],
+        value: "Une boutique en ligne complète où vos clients commandent seuls et paient à la livraison.",
+        highlights: ["Jusqu'à 30 produits", "Tailles et couleurs avec photos", "Paiement à la livraison", "Livraison dans les 58 wilayas", "Suivi des commandes de A à Z", "Alerte WhatsApp à chaque commande"],
         sections: [
           "Accueil (bannière, catégories, nouveautés, meilleures ventes)",
           "Boutique",
@@ -506,6 +469,7 @@ export const CATEGORIES: Category[] = [
           "On répare gratuitement pendant 3 mois",
         ],
         delay: "15 jours",
+        examples: ["Vêtements", "Cosmétiques", "Accessoires"],
       },
       {
         id: "boutique-pro",
@@ -513,15 +477,8 @@ export const CATEGORIES: Category[] = [
         price: 129000,
         included: 150,
         forWho: "Je reçois des commandes chaque jour",
-        value:
-          "Moins de faux colis, moins de travail manuel, plus de ventes. Les commandes partent seules chez le livreur, vous récupérez les clients qui abandonnent, et vous savez exactement ce que rapportent vos publicités.",
-        highlights: [
-          "Jusqu'à 150 produits",
-          t("api_delivery"),
-          "Protection contre les fausses commandes",
-          "Récupération des commandes abandonnées",
-          t("pixel"),
-        ],
+        value: "Une boutique qui travaille pour vous : livraison automatique, stock suivi, faux colis bloqués.",
+        highlights: ["Jusqu'à 150 produits", "Commandes envoyées seules au livreur", "Blocage des faux numéros", "Récupère les commandes abandonnées", "Stock suivi, produits épuisés cachés", "Mesure de vos pubs Facebook et TikTok", "Codes promo et statistiques"],
         sections: ["Tout ce qu'offre Boutique", "Promotions", "Suivi de commande"],
         features: [
           "Tout ce qu'offre Boutique",
@@ -540,6 +497,7 @@ export const CATEGORIES: Category[] = [
           "On répare gratuitement pendant 6 mois",
         ],
         delay: "25 jours",
+        examples: ["Marque de chaussures", "Électroménager", "Boutique multi-produits"],
       },
       {
         id: "boutique-marque",
@@ -547,15 +505,8 @@ export const CATEGORIES: Category[] = [
         price: 199000,
         included: null,
         forWho: "J'ai une vraie marque et une équipe",
-        value:
-          "Une boutique au niveau des grandes marques. Paiement par carte, clients fidélisés avec leur compte, et une équipe qui travaille dessus avec des accès séparés.",
-        highlights: [
-          "Produits illimités",
-          "Paiement par carte (CIB / Edahabia)",
-          "Comptes clients et programme fidélité",
-          "Plusieurs admins avec des rôles",
-          "Maintenance chaque mois pendant 1 an",
-        ],
+        value: "La boutique d'une vraie marque : paiement par carte, comptes clients et équipe.",
+        highlights: ["Produits illimités", "Paiement par carte (CIB / Edahabia)", "Comptes clients et fidélité", "Plusieurs admins avec des rôles", "S'installe comme une application", "Maintenance chaque mois pendant 1 an"],
         sections: ["Tout ce qu'offre Boutique Pro", "Espace client", "Programme fidélité"],
         features: [
           "Tout ce qu'offre Boutique Pro",
@@ -573,6 +524,7 @@ export const CATEGORIES: Category[] = [
         ],
         delay: "35 jours",
         includesExtras: ["app"],
+        examples: ["Marque de mode", "Grande parfumerie", "Chaîne de magasins"],
       },
       {
         id: "landing-page",
@@ -581,13 +533,8 @@ export const CATEGORIES: Category[] = [
         included: 1,
         hidden: true,
         forWho: "Je vends un seul produit",
-        value: "Une page qui ne parle que de votre produit et pousse à commander, parfaite avec vos publicités.",
-        highlights: [
-          t("landing"),
-          `Formulaire de commande avec ${t("cod")}`,
-          t("pixel"),
-          "Livré en 5 jours",
-        ],
+        value: "Une seule page pensée pour vendre un produit, parfaite avec vos publicités.",
+        highlights: ["1 page pour 1 produit", "Formulaire de commande", "Paiement à la livraison", "Mesure de vos pubs Facebook et TikTok"],
         features: [
           t("landing"),
           `Formulaire de commande avec ${t("cod")}`,
@@ -596,6 +543,7 @@ export const CATEGORIES: Category[] = [
         ],
         inclus: ["Mise en ligne de votre page", "On répare gratuitement pendant 3 mois"],
         delay: "5 jours",
+        examples: ["Produit gagnant", "Nouveau produit à tester"],
       },
     ],
     extras: [
@@ -632,6 +580,7 @@ export const CATEGORIES: Category[] = [
   {
     id: "gestion",
     billing: "yearly",
+    delayLabel: "Mise en service",
     title: "Je veux un logiciel pour gérer mon business",
     label: "Logiciel de gestion",
     model: "Un abonnement par an, tout compris.",
@@ -653,9 +602,8 @@ export const CATEGORIES: Category[] = [
         period: "year",
         modules: 1,
         forWho: "Je gère seul mon activité",
-        value:
-          "Fini le cahier et Excel. Tout est au même endroit, accessible depuis votre téléphone, et vos données ne se perdent jamais.",
-        highlights: ["1 module au choix", "1 utilisateur", "Marche sur téléphone et ordinateur", t("backup", "Backup chaque jour"), "Mise en service en 7 jours"],
+        value: "Un logiciel simple pour gérer seul votre activité, depuis votre téléphone.",
+        highlights: ["1 module au choix", "1 utilisateur", "Marche sur téléphone et ordinateur", "Données sauvegardées chaque jour", "Formation vidéo"],
         features: [
           "1 module au choix",
           "1 utilisateur",
@@ -663,7 +611,8 @@ export const CATEGORIES: Category[] = [
           `${t("backup", "Backup automatique chaque jour")}`,
         ],
         inclus: ["Installation", "Hébergement", "Mises à jour", "Formation vidéo", "Réparations pendant toute l'année"],
-        delay: "mise en service en 7 jours",
+        delay: "7 jours",
+        examples: ["Pharmacie", "Salon de coiffure", "Petit commerce"],
       },
       {
         id: "gestion-pro",
@@ -672,8 +621,8 @@ export const CATEGORIES: Category[] = [
         period: "year",
         modules: 3,
         forWho: "J'ai une petite équipe",
-        value: "Chaque employé a son accès, vous voyez tout ce qui se passe même à distance, et les documents se font en un clic.",
-        highlights: ["Jusqu'à 3 modules", "5 utilisateurs avec des droits différents", "Factures et documents PDF", "Statistiques et export Excel", "Alertes WhatsApp"],
+        value: "Un logiciel pour votre équipe : chacun son accès, factures et statistiques en un clic.",
+        highlights: ["Jusqu'à 3 modules", "5 utilisateurs avec leurs droits", "Factures et devis en PDF", "Statistiques et export Excel", "Alertes WhatsApp (stock bas, rendez-vous)"],
         features: [
           "Tout ce qu'offre Gestion Simple",
           "Jusqu'à 3 modules",
@@ -684,7 +633,8 @@ export const CATEGORIES: Category[] = [
           "Alertes WhatsApp (stock bas, nouveau rendez-vous…)",
         ],
         inclus: ["Installation", "Hébergement", "Mises à jour", "Formation", "Réparations pendant toute l'année"],
-        delay: "mise en service en 14 jours",
+        delay: "14 jours",
+        examples: ["Cabinet dentaire", "Quincaillerie", "Auto-école"],
       },
       {
         id: "gestion-entreprise",
@@ -693,8 +643,8 @@ export const CATEGORIES: Category[] = [
         period: "year",
         modules: null,
         forWho: "J'ai plusieurs magasins ou agences",
-        value: "Tous vos points de vente dans un seul logiciel, adapté à votre façon de travailler, avec un support prioritaire.",
-        highlights: ["Tous les modules", "Utilisateurs illimités", "Plusieurs magasins ou agences", "Adapté à votre métier", "Aide en priorité 7 jours sur 7"],
+        value: "Un seul logiciel pour tous vos magasins ou agences, adapté à votre métier.",
+        highlights: ["Tous les modules", "Utilisateurs illimités", "Plusieurs magasins ou agences", "Adapté à votre façon de travailler", "Aide en priorité 7j/7"],
         features: [
           "Tout ce qu'offre Gestion Pro",
           "Tous les modules",
@@ -704,7 +654,8 @@ export const CATEGORIES: Category[] = [
           "Serveur rapide rien que pour vous",
         ],
         inclus: ["Installation", "Hébergement", "Mises à jour", "Formation sur place ou en visio", "Aide en priorité 7 jours sur 7"],
-        delay: "mise en service en 21 jours",
+        delay: "21 jours",
+        examples: ["Chaîne de magasins", "Grossiste", "Réseau d'agences"],
       },
     ],
     extras: [
@@ -751,8 +702,8 @@ export const CATEGORIES: Category[] = [
         name: "Version test",
         price: 119000,
         forWho: "Je veux tester mon idée avec de vrais clients",
-        value: "Vous vérifiez que votre idée marche avant d'investir plus. Vos premiers clients l'utilisent et vous donnent leur avis.",
-        highlights: ["Inscription et connexion", "Les 1 ou 2 fonctions principales", "Tableau de bord admin", `${t("landing", "Landing page")} qui présente la plateforme`, "Livré en 4 semaines"],
+        value: "Une première version de votre plateforme pour la tester avec de vrais clients.",
+        highlights: ["Inscription et connexion", "Les 1 ou 2 fonctions clés de votre idée", "Tableau de bord admin", "Une page qui présente votre plateforme", "Marche sur téléphone et ordinateur"],
         features: [
           "Inscription et connexion",
           "Les 1 ou 2 fonctions principales de votre idée",
@@ -763,14 +714,15 @@ export const CATEGORIES: Category[] = [
         ],
         inclus: [`${t("hosting")} pendant 1 an`, "3 tours de modifications", "On répare gratuitement pendant 3 mois"],
         delay: "4 semaines",
+        examples: ["Prise de rendez-vous en ligne", "Gestion de stock pour grossistes"],
       },
       {
         id: "prete-a-vendre",
         name: "Prête à vendre",
         price: 219000,
         forWho: "Je veux vendre des abonnements",
-        value: "Une plateforme qui encaisse seule. Vos clients s'inscrivent, paient leur abonnement et utilisent le service sans que vous interveniez.",
-        highlights: ["Abonnements au mois ou à l'année", "Paiement en ligne (CIB / Edahabia)", t("tenant"), "Emails automatiques", "Suivi des clients et des revenus"],
+        value: "Une plateforme complète qui encaisse les abonnements de vos clients toute seule.",
+        highlights: ["Abonnements au mois ou à l'année", "Paiement en ligne (CIB / Edahabia)", "Un espace privé pour chaque entreprise cliente", "Emails automatiques (bienvenue, facture)", "Suivi des clients et des revenus"],
         features: [
           "Tout ce qu'offre Version test",
           "Abonnements au mois ou à l'année",
@@ -781,15 +733,15 @@ export const CATEGORIES: Category[] = [
         ],
         inclus: [`${t("hosting")} pendant 1 an`, "Formation vidéo", "4 tours de modifications", "On répare gratuitement pendant 6 mois"],
         delay: "8 semaines",
+        examples: ["Logiciel pour cabinets médicaux", "Gestion de flotte auto"],
       },
       {
         id: "grande-plateforme",
         name: "Grande plateforme",
         price: 349000,
         forWho: "Je vise beaucoup de clients",
-        value:
-          "Une plateforme solide qui grandit avec vous : des équipes dans chaque entreprise cliente, une application mobile, et un serveur qui tient la charge.",
-        highlights: ["Équipes et rôles chez chaque client", "Application mobile", t("api"), "Serveur rapide rien que pour vous", "Maintenance chaque mois pendant 1 an"],
+        value: "Une plateforme solide, avec application mobile, prête pour des centaines de clients.",
+        highlights: ["Équipes et rôles chez chaque client", "Application mobile", "Connexion avec d'autres logiciels", "Serveur rapide rien que pour vous", "Maintenance chaque mois pendant 1 an"],
         features: [
           "Tout ce qu'offre Prête à vendre",
           "Équipes et rôles dans chaque entreprise cliente",
@@ -800,6 +752,7 @@ export const CATEGORIES: Category[] = [
         inclus: [`${t("hosting")} pendant 1 an`, "Maintenance chaque mois pendant 1 an", "Aide en priorité 7 jours sur 7"],
         delay: "12 semaines",
         includesExtras: ["app"],
+        examples: ["Gestion BTP / chantiers", "Plateforme pour écoles privées"],
       },
     ],
     extras: [
@@ -831,46 +784,64 @@ export const CATEGORIES: Category[] = [
   },
   {
     id: "ia",
-    billing: "setupMonthly",
+    billing: "oneTime",
     title: "Je veux répondre à mes clients automatiquement",
     label: `Assistant IA – ${GLOSSARY.chatbot.term}`,
-    model: "Une installation, puis un petit montant chaque mois.",
+    model: "Un prix unique pour l'installer. Le suivi mensuel est en option.",
     explain:
-      "Un assistant qui répond à vos clients 24h/24. Il y a une installation, puis un petit montant chaque mois car l'IA fonctionne en continu.",
+      "Un assistant qui répond à vos clients 24h/24. Vous payez l'installation une fois, et vous pouvez ajouter un suivi chaque mois si vous le souhaitez.",
     packs: [
       {
         id: "assistant-site",
         name: "Assistant site",
         price: 35000,
-        monthly: 3000,
         forWho: "Je veux répondre aux questions des visiteurs de mon site",
-        value: "Vos visiteurs ont une réponse immédiate, même la nuit, et les clients intéressés vous sont envoyés sur WhatsApp.",
-        highlights: [`${t("chatbot")} sur votre site`, "Entraîné sur vos informations", "Comprend le français et l'arabe", "Vous envoie les clients sur WhatsApp", "Livré en 5 jours"],
+        value: "Un assistant sur votre site qui répond aux visiteurs 24h/24, même la nuit.",
+        highlights: [
+          "Réponses automatiques aux questions fréquentes",
+          "Infos simples : prix, horaires, services, adresse",
+          "Réponse immédiate, 24h/24 et 7j/7",
+          "Envoie les clients intéressés sur WhatsApp",
+          "Installation et configuration incluses",
+        ],
         features: [
-          `${t("chatbot")} sur votre site, entraîné sur vos informations (services, prix, horaires, FAQ)`,
+          `${t("chatbot")} sur votre site`,
+          "Entraîné sur vos informations : services, prix, horaires, FAQ",
+          "Répond seulement avec vos informations, sans inventer",
           "Comprend le français et l'arabe",
+          "Récupère le nom et le téléphone des visiteurs intéressés",
           "Envoie les clients intéressés sur WhatsApp",
         ],
-        inclus: ["Installation", "1 ajustement des réponses chaque mois"],
+        inclus: ["Installation et configuration", "1 ajustement des réponses chaque mois avec le suivi mensuel"],
         delay: "5 jours",
+        examples: ["Clinique (horaires, rendez-vous)", "Agence immobilière (biens, visites)", "École ou centre de formation"],
       },
       {
         id: "assistant-messages",
         name: "Assistant WhatsApp / Instagram",
         price: 70000,
-        monthly: 6000,
         forWho: "Je reçois trop de messages pour répondre à tout",
-        value: "Plus aucun client qui attend ou qui part. L'assistant répond, prend les commandes et les rendez-vous, et vous passe la main quand il faut.",
-        highlights: ["Répond sur WhatsApp et Instagram", "Prend les commandes et les rendez-vous", "Français, arabe et darija", "Vous passe la main quand il faut", "Résumé des conversations chaque mois"],
-        features: [
-          "Répond automatiquement aux messages WhatsApp et Instagram",
+        value: "Un assistant qui répond sur WhatsApp et Instagram et prend les commandes.",
+        highlights: [
+          "Répond sur WhatsApp et Instagram, 24h/24",
           "Prend les commandes et les rendez-vous",
           "Comprend le français, l'arabe et la darija",
+          "Vous passe la conversation quand il le faut",
+          "Résumé des conversations chaque mois",
+        ],
+        features: [
+          "Tout ce qu'offre Assistant site",
+          "Répond automatiquement aux messages WhatsApp et Instagram",
+          "Entraîné sur vos documents : catalogue, menu, tarifs (PDF, Word)",
+          "Prend les commandes et les rendez-vous",
+          "Comprend le français, l'arabe et la darija",
+          "Gère plusieurs conversations en même temps",
           "Passe la conversation à un humain quand il le faut",
           "Résumé des conversations chaque mois",
         ],
-        inclus: ["Installation", "2 ajustements des réponses chaque mois"],
+        inclus: ["Installation et configuration", "2 ajustements des réponses chaque mois avec le suivi mensuel"],
         delay: "10 jours",
+        examples: ["Boutique Instagram (commandes, tailles)", "Restaurant (réservations, menu)", "Salon de beauté (rendez-vous)"],
       },
       {
         id: "ia-projet",
@@ -878,15 +849,36 @@ export const CATEGORIES: Category[] = [
         price: 0,
         quote: true,
         forWho: "Je veux une IA connectée à mes données ou à mon logiciel",
-        value: "Une IA qui travaille avec vos propres données ou votre logiciel. On en parle ensemble pour vous donner un prix juste.",
-        highlights: ["Branchée sur vos données ou votre logiciel", "On en parle ensemble sur WhatsApp"],
-        features: ["Une IA branchée sur vos données ou votre logiciel"],
-        inclus: ["Prix fixé après un échange sur WhatsApp"],
+        value: "Une IA sur mesure, branchée sur vos documents, vos données ou votre logiciel.",
+        highlights: [
+          "Entraînée sur vos documents (PDF, Word, Excel)",
+          "Connectée à votre logiciel ou à vos données",
+          "Gère les demandes complexes",
+          "Aide à la décision : résumés et rapports",
+          "Accès réservé à votre équipe",
+        ],
+        features: [
+          "Entraînée sur vos documents internes (PDF, Word, Excel)",
+          "Répond seulement avec vos données vérifiées",
+          `Connectée à votre logiciel ou à vos données (${GLOSSARY.api.term} : ${GLOSSARY.api.def})`,
+          "Gère les demandes complexes, étape par étape",
+          "Aide à la décision : résumés, rapports, recherches dans vos fichiers",
+          "Organise et retrouve vos informations en quelques secondes",
+        ],
+        inclus: ["Étude de votre besoin", "Prix fixé après un échange sur WhatsApp", "Aide en priorité 7 jours sur 7"],
+        examples: ["Cabinet juridique ou comptable", "Service après-vente 24h/24", "Assistant interne pour vos employés"],
       },
     ],
     extras: [
       { id: "boutique", label: "Connecté à votre boutique (stock, commandes)", price: 20000 },
       { id: "rdv", label: "Prise de rendez-vous automatique", price: 15000 },
+      {
+        id: "maintenance",
+        label: "Suivi mensuel (on surveille et on ajuste les réponses)",
+        price: 3000,
+        per: "month",
+        packPrices: { "assistant-site": 3000, "assistant-messages": 6000 },
+      },
     ],
     helper: {
       questions: [
@@ -1003,6 +995,7 @@ export function suggestedPack(c: Category, p: Pack, s: Pick<Selection, "qty" | "
 
 export function extraAmount(c: Category, p: Pack, e: Extra, qty: number): number {
   if (p.includesExtras?.includes(e.id)) return 0;
+  if (e.packPrices?.[p.id] !== undefined) return e.packPrices[p.id];
   if (e.per === "page") return e.price * Math.max(qty, 1);
   if (e.per === "20products") return e.price * Math.max(1, Math.ceil(qty / 20));
   return e.price;
