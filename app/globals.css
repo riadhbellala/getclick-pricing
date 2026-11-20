@@ -138,27 +138,29 @@ body {
 
 /* Backdrop grid: faint ink, fades out from the top, drifts slowly */
 .bg-grid {
+  --cell: 160px;
   position: absolute;
-  inset: -224px 0 0 0;
+  inset: calc(var(--cell) * -1) 0 0 0;
   background-image:
-    linear-gradient(rgba(23, 18, 15, 0.14) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 18, 15, 0.14) 1px, transparent 1px),
-    linear-gradient(rgba(23, 18, 15, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 18, 15, 0.07) 1px, transparent 1px);
-  background-size:
-    224px 224px,
-    224px 224px,
-    56px 56px,
-    56px 56px;
+    linear-gradient(rgba(23, 18, 15, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 18, 15, 0.075) 1px, transparent 1px);
+  background-size: var(--cell) var(--cell);
   background-position: center top;
-  
-  animation:
-    fade 1200ms ease-out both,
-    drift 40s linear infinite;
+  animation: fade 1200ms ease-out both;
+}
+/* Solid tiles sitting exactly in grid cells: the grid becomes part of the layout, not just texture. */
+.bg-tile {
+  position: absolute;
+  width: calc(var(--cell) - 1px);
+  height: calc(var(--cell) - 1px);
+  top: calc(var(--row) * var(--cell) + 1px);
+  left: calc(50% - var(--cell) / 2 + var(--col) * var(--cell) + 1px);
+  animation: fade 900ms ease-out both;
+  animation-delay: var(--d, 400ms);
 }
 @keyframes drift {
   to {
-    transform: translateY(224px);
+    transform: translateY(160px);
   }
 }
 
@@ -228,6 +230,20 @@ body {
   }
 }
 
+/* Panel: slides up on phones, in from the right on desktop */
+.sheet {
+  transform: translateY(100%);
+  transition: transform 380ms var(--ease-drawer, cubic-bezier(0.32, 0.72, 0, 1));
+}
+.sheet.sheet-open {
+  transform: none;
+}
+@media (min-width: 768px) {
+  .sheet {
+    transform: translateX(100%);
+  }
+}
+
 /* Price/total change */
 .tick {
   animation: tick 260ms var(--ease-out);
@@ -259,6 +275,14 @@ body {
   .js .reveal {
     transform: none;
     transition: opacity 300ms ease;
+  }
+  .sheet {
+    transition: opacity 200ms ease;
+    transform: none;
+    opacity: 0;
+  }
+  .sheet.sheet-open {
+    opacity: 1;
   }
   .press:active,
   .lift:hover {
