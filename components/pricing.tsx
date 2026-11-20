@@ -130,7 +130,7 @@ function Hero() {
         className="hero-in mx-auto mt-5 max-w-[40ch] text-[clamp(18px,1.6vw,22px)] leading-[1.5]"
         style={{ animationDelay: "480ms" }}
       >
-        Choisissez ce dont vous avez besoin. Prix final, sans surprise.
+        Choisissez ce dont vous avez besoin. Prix final, tout est détaillé.
       </p>
     </section>
   );
@@ -197,6 +197,7 @@ function Offer({
   const packs = visiblePacks(category);
   const hi = highlightIndex(category);
   const [helperOpen, setHelperOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const side = category.sideLink?.packId ? getPack(category, category.sideLink.packId) : null;
 
   return (
@@ -224,6 +225,16 @@ function Offer({
       </div>
 
       <div className="mt-6 flex flex-col gap-2 text-[15px] sm:flex-row sm:flex-wrap sm:gap-x-8">
+        {category.sectionLibrary && (
+          <button
+            type="button"
+            aria-expanded={libraryOpen}
+            onClick={() => setLibraryOpen((o) => !o)}
+            className="press inline-flex min-h-11 items-center font-medium underline decoration-ink/30 underline-offset-4 hover:decoration-copper"
+          >
+            Voir les sections disponibles
+          </button>
+        )}
         {category.helper && (
           <button
             type="button"
@@ -254,6 +265,21 @@ function Offer({
           </button>
         )}
       </div>
+
+      {libraryOpen && category.sectionLibrary && (
+        <div className="swap mt-4 rounded-2xl bg-surface p-6 ring-1 ring-ink/10 sm:p-8">
+          <p className="text-[clamp(20px,2.4vw,26px)] font-semibold tracking-[-0.02em]">Les sections de votre site</p>
+          <p className="mt-1 text-[15px] text-ink/70">Les blocs que vous pouvez choisir pour construire vos pages.</p>
+          <dl className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            {category.sectionLibrary.map((sec) => (
+              <div key={sec.name} className="rounded-xl bg-surface-2 px-4 py-3">
+                <dt className="text-[15px] font-semibold">{sec.name}</dt>
+                <dd className="mt-0.5 text-[14px] leading-[1.5] text-ink/75">{sec.desc}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
 
       {helperOpen && category.helper && (
         <Helper
@@ -286,9 +312,12 @@ function PackCard({
 }) {
   const [all, setAll] = useState(false);
   const dark = highlighted;
-  const items = all ? pack.items : pack.items.slice(0, VISIBLE_ITEMS);
-  const more = pack.items.length - VISIBLE_ITEMS;
-  const listId = `items-${pack.id}`;
+  const detailsId = `details-${pack.id}`;
+  const groups = [
+    { title: "Pages & sections", items: pack.sections ?? [] },
+    { title: "Fonctionnalités", items: pack.features },
+    { title: "Inclus avec", items: pack.inclus },
+  ].filter((g) => g.items.length > 0);
 
   return (
     <article
@@ -329,27 +358,54 @@ function PackCard({
         <span className="font-medium">« {pack.forWho} »</span>
       </p>
 
-      <div className={`my-6 h-2 rounded-full ${dark ? "bg-bone/[0.06]" : "bg-surface-2"}`} aria-hidden />
+      <div className={`mt-5 rounded-xl px-4 py-4 ${dark ? "bg-bone/[0.07]" : "bg-surface-2"}`}>
+        <p className={`text-[13px] font-semibold ${dark ? "text-bone/70" : "text-copper"}`}>Ce que ça vous apporte</p>
+        <p className="mt-1.5 text-[15px] leading-[1.5]">{pack.value}</p>
+      </div>
 
-      {pack.inherits && <p className="text-[15px] font-semibold">{pack.inherits}</p>}
-      <ul id={listId} className={`grid gap-3 ${pack.inherits ? "mt-3" : ""}`}>
-        {items.map((f) => (
+      <ul className="mt-6 grid gap-3">
+        {pack.highlights.slice(0, VISIBLE_ITEMS).map((f) => (
           <li key={f} className="flex gap-3 text-[15px] leading-[1.45]">
             <Check className="mt-[3px] shrink-0 text-copper" />
             {f}
           </li>
         ))}
       </ul>
-      {more > 0 && (
-        <button
-          type="button"
-          aria-expanded={all}
-          aria-controls={listId}
-          onClick={() => setAll((a) => !a)}
-          className="press mt-4 inline-flex min-h-10 items-center self-start text-[15px] font-medium underline decoration-current/30 underline-offset-4"
-        >
-          {all ? "Voir moins" : `Voir tout (${pack.items.length})`}
-        </button>
+
+      <button
+        type="button"
+        aria-expanded={all}
+        aria-controls={detailsId}
+        onClick={() => setAll((a) => !a)}
+        className="press mt-5 inline-flex min-h-10 items-center gap-2 self-start text-[15px] font-medium underline decoration-current/30 underline-offset-4"
+      >
+        {all ? "Voir moins" : "Voir tout"}
+        <span aria-hidden className={`inline-block transition-transform duration-200 ${all ? "rotate-180" : ""}`}>
+          ↓
+        </span>
+      </button>
+      {all && (
+        <div id={detailsId} className="swap mt-4 grid gap-5">
+          {groups.map((g) => (
+            <div key={g.title}>
+              <p className="text-[14px] font-semibold">{g.title}</p>
+              <ul className="mt-2 grid gap-2">
+                {g.items.map((f) => (
+                  <li key={f} className={`flex gap-3 text-[14px] leading-[1.5] ${dark ? "text-bone/85" : "text-ink/85"}`}>
+                    <span aria-hidden className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-copper" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          {pack.delay && (
+            <p className="text-[14px]">
+              <span className="font-semibold">Délai : </span>
+              {pack.delay}
+            </p>
+          )}
+        </div>
       )}
 
       <div aria-hidden className="min-h-8 flex-1" />
